@@ -37,9 +37,9 @@
   }
 
   .wrap {
-    max-width: 1120px;
+    max-width: 1550px;
     margin: 0 auto;
-    padding: 20px 16px 60px;
+    padding: 20px 24px 60px;
   }
 
   header {
@@ -54,7 +54,7 @@
   .title-block h1 {
     font-family: 'Prompt', sans-serif;
     font-weight: 800;
-    font-size: 28px;
+    font-size: 40px;
     margin: 0;
     letter-spacing: -0.5px;
   }
@@ -167,9 +167,9 @@
     align-items: flex-start;
     gap: 20px;
   }
-  .cal-col { flex: 1 1 640px; min-width: 0; }
+  .cal-col { flex: 1 1 800px; min-width: 0; }
   .side-col {
-    flex: 0 0 300px;
+    flex: 0 0 340px;
     position: sticky;
     top: 20px;
   }
@@ -199,11 +199,11 @@
     grid-template-columns: repeat(7, 1fr);
   }
   .day {
-    height: 115px; 
+    height: 148px;
     overflow: hidden;
     border-right: 1px solid var(--paper-line);
     border-bottom: 1px solid var(--paper-line);
-    padding: 6px 6px 8px;
+    padding: 8px 8px 10px;
     position: relative;
     cursor: pointer;
     transition: background .12s ease;
@@ -215,33 +215,33 @@
   .day.selected { background: #FBF3E1; }
   .day-num {
     font-family: 'Prompt', sans-serif;
-    font-size: 13px;
+    font-size: 14.5px;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 22px; height: 22px;
+    width: 25px; height: 25px;
     border-radius: 50%;
   }
   .day.today .day-num {
     background: var(--accent-today);
     color: #fff;
   }
-  .events { margin-top: 4px; display: flex; flex-direction: column; gap: 3px; }
+  .events { margin-top: 6px; display: flex; flex-direction: column; gap: 5px; }
   .ev-chip {
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 5px;
+    font-size: 12.5px;
+    padding: 4px 8px;
+    border-radius: 6px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-weight: 600;
-    line-height: 1.5;
+    line-height: 1.4;
   }
   .ev-more {
-    font-size: 10.5px;
+    font-size: 11.5px;
     color: var(--ink-soft);
-    padding-left: 6px;
+    padding-left: 8px;
   }
 
   .panel {
@@ -286,6 +286,15 @@
     font-size: 12.5px;
     color: var(--ink-soft);
     line-height: 1.6;
+  }
+  .panel-item .pi-notes {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--paper-line);
+    font-size: 12.5px;
+    color: var(--ink);
+    line-height: 1.6;
+    white-space: pre-line;
   }
   .panel-item .pi-actions {
     display: flex;
@@ -351,7 +360,7 @@
     color: var(--ink-soft);
     margin-bottom: 5px;
   }
-  .field input, .field select {
+  .field input, .field select, .field textarea {
     width: 100%;
     padding: 9px 10px;
     border: 1.5px solid var(--paper-line);
@@ -361,7 +370,12 @@
     background: var(--paper);
     color: var(--ink);
   }
-  .field input:focus, .field select:focus {
+  .field textarea {
+    resize: vertical;
+    min-height: 70px;
+    line-height: 1.5;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
     outline: none;
     border-color: var(--ink);
   }
@@ -452,7 +466,7 @@
   }
 
   @media (max-width: 560px) {
-    .day { min-height: 86px; padding: 4px; }
+    .day { height: 90px; padding: 4px; }
     .ev-chip { font-size: 9.5px; padding: 1px 4px; }
     .month-bar .month-label { font-size: 17px; min-width: 130px; }
     .dow-row div { font-size: 10.5px; }
@@ -518,10 +532,8 @@
 
     <div class="field">
       <label>วิชา</label>
-      <div class="select-with-add">
-        <select id="f-subject"></select>
-        <button type="button" class="add-mini" id="addSubjectBtn" title="เพิ่มวิชาใหม่">+</button>
-      </div>
+      <input type="text" id="f-subject" list="subjectList" placeholder="พิมพ์ชื่อวิชา หรือเลือกจากรายการเดิม" autocomplete="off">
+      <datalist id="subjectList"></datalist>
     </div>
 
     <div class="row2">
@@ -550,10 +562,13 @@
 
     <div class="field">
       <label>สถานที่</label>
-      <div class="select-with-add">
-        <select id="f-location"></select>
-        <button type="button" class="add-mini" id="addLocationBtn" title="เพิ่มสถานที่ใหม่">+</button>
-      </div>
+      <input type="text" id="f-location" list="locationList" placeholder="พิมพ์สถานที่ หรือเลือกจากรายการเดิม" autocomplete="off">
+      <datalist id="locationList"></datalist>
+    </div>
+
+    <div class="field">
+      <label>รายละเอียดเพิ่มเติม</label>
+      <textarea id="f-notes" rows="3" placeholder="เช่น เนื้อหาที่สอน การบ้าน หรือหมายเหตุอื่น ๆ"></textarea>
     </div>
 
     <div class="modal-actions">
@@ -662,6 +677,9 @@ async function loadData() {
     showLoadError('เชื่อมต่อ Supabase ไม่สำเร็จ: ' + (e.message || 'โปรดตรวจสอบตารางและ RLS policy'));
     return;
   }
+
+  populateDatalist(document.getElementById('subjectList'), data.subjects);
+  populateDatalist(document.getElementById('locationList'), data.locations);
 
   document.getElementById('loadingNote').style.display = 'none';
   renderLegend();
@@ -841,6 +859,7 @@ function renderPanel() {
             ${ev.time ? '🕐 ' + escapeHtml(ev.time.slice(0,5)) + ' น.<br>' : ''}
             ${ev.location ? '📍 ' + escapeHtml(ev.location) : ''}
           </div>
+          ${ev.notes ? `<div class="pi-notes">${escapeHtml(ev.notes)}</div>` : ''}
           ${isAdmin ? `
           <div class="pi-actions">
             <button class="pi-edit" data-id="${ev.id}">แก้ไข</button>
@@ -873,52 +892,34 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// ---- Select helpers (subjects / locations) ----
-function populateSelect(selectEl, arr, selectedValue) {
-  selectEl.innerHTML = '';
-  if (arr.length === 0) {
-    const opt = document.createElement('option');
-    opt.value = '';
-    opt.textContent = 'ยังไม่มีรายการ — กด + เพื่อเพิ่ม';
-    selectEl.appendChild(opt);
-    return;
-  }
+// ---- Datalist helper (subjects / locations autocomplete) ----
+function populateDatalist(datalistEl, arr) {
+  datalistEl.innerHTML = '';
   arr.forEach(item => {
     const opt = document.createElement('option');
     opt.value = item;
-    opt.textContent = item;
-    selectEl.appendChild(opt);
+    datalistEl.appendChild(opt);
   });
-  if (selectedValue && arr.includes(selectedValue)) {
-    selectEl.value = selectedValue;
-  }
 }
 
-document.getElementById('addSubjectBtn').onclick = async () => {
-  const name = prompt('ชื่อวิชาใหม่:');
-  if (!name || !name.trim()) return;
-  const trimmed = name.trim();
-  if (!data.subjects.includes(trimmed)) {
-    const ok = await addSubjectRemote(trimmed);
-    if (!ok) return;
-    data.subjects.push(trimmed);
-    data.subjects.sort((a, b) => a.localeCompare(b, 'th'));
-  }
-  populateSelect(document.getElementById('f-subject'), data.subjects, trimmed);
-};
+// เพิ่มชื่อวิชา/สถานที่ใหม่ลงรายการอัตโนมัติ ถ้ายังไม่เคยมี (เรียกตอนกดบันทึกวิชา)
+async function ensureSubjectSaved(name) {
+  if (!name || data.subjects.includes(name)) return;
+  const ok = await addSubjectRemote(name);
+  if (!ok) return;
+  data.subjects.push(name);
+  data.subjects.sort((a, b) => a.localeCompare(b, 'th'));
+  populateDatalist(document.getElementById('subjectList'), data.subjects);
+}
 
-document.getElementById('addLocationBtn').onclick = async () => {
-  const name = prompt('สถานที่ใหม่:');
-  if (!name || !name.trim()) return;
-  const trimmed = name.trim();
-  if (!data.locations.includes(trimmed)) {
-    const ok = await addLocationRemote(trimmed);
-    if (!ok) return;
-    data.locations.push(trimmed);
-    data.locations.sort((a, b) => a.localeCompare(b, 'th'));
-  }
-  populateSelect(document.getElementById('f-location'), data.locations, trimmed);
-};
+async function ensureLocationSaved(name) {
+  if (!name || data.locations.includes(name)) return;
+  const ok = await addLocationRemote(name);
+  if (!ok) return;
+  data.locations.push(name);
+  data.locations.sort((a, b) => a.localeCompare(b, 'th'));
+  populateDatalist(document.getElementById('locationList'), data.locations);
+}
 
 // ---- Event modal ----
 function renderSchoolPick() {
@@ -940,14 +941,16 @@ function openAdd(dateStr) {
   editingId = null;
   document.getElementById('modalTitle').textContent = 'เพิ่มวิชาเรียน';
   document.getElementById('deleteBtn').style.display = 'none';
-  populateSelect(document.getElementById('f-subject'), data.subjects, null);
-  populateSelect(document.getElementById('f-location'), data.locations, null);
+  document.getElementById('f-subject').value = '';
+  document.getElementById('f-location').value = '';
+  document.getElementById('f-notes').value = '';
   document.getElementById('f-grade').value = '1';
   document.getElementById('f-date').value = dateStr || selectedDate || dateKey(current.getFullYear(), current.getMonth(), 1);
   document.getElementById('f-time').value = '';
   pickedSchool = data.schools[0].id;
   renderSchoolPick();
   document.getElementById('overlay').classList.add('show');
+  document.getElementById('f-subject').focus();
 }
 
 function openEdit(id) {
@@ -957,8 +960,9 @@ function openEdit(id) {
   editingId = id;
   document.getElementById('modalTitle').textContent = 'แก้ไขวิชาเรียน';
   document.getElementById('deleteBtn').style.display = 'inline-block';
-  populateSelect(document.getElementById('f-subject'), data.subjects, ev.subject);
-  populateSelect(document.getElementById('f-location'), data.locations, ev.location);
+  document.getElementById('f-subject').value = ev.subject || '';
+  document.getElementById('f-location').value = ev.location || '';
+  document.getElementById('f-notes').value = ev.notes || '';
   document.getElementById('f-grade').value = ev.grade || '1';
   document.getElementById('f-date').value = ev.date || '';
   document.getElementById('f-time').value = ev.time ? ev.time.slice(0,5) : '';
@@ -984,10 +988,18 @@ document.getElementById('overlay').onclick = (e) => { if (e.target.id === 'overl
 document.getElementById('saveBtn').onclick = async () => {
   if (!isAdmin) return;
   const saveBtn = document.getElementById('saveBtn');
-  const subject = document.getElementById('f-subject').value;
+  const subject = document.getElementById('f-subject').value.trim();
+  const location = document.getElementById('f-location').value.trim();
+  const notes = document.getElementById('f-notes').value.trim();
   const dateVal = document.getElementById('f-date').value;
-  if (!subject) { alert('กรุณาเลือกหรือเพิ่มชื่อวิชา'); return; }
+  if (!subject) { alert('กรุณากรอกชื่อวิชา'); return; }
   if (!dateVal) { alert('กรุณาเลือกวันที่'); return; }
+
+  saveBtn.disabled = true;
+
+  // พิมพ์ชื่อวิชา/สถานที่ใหม่ที่ยังไม่เคยมี ให้บันทึกเก็บไว้ใช้แนะนำครั้งต่อไปอัตโนมัติ
+  await ensureSubjectSaved(subject);
+  if (location) await ensureLocationSaved(location);
 
   const evData = {
     id: editingId || ('ev_' + Date.now()),
@@ -995,11 +1007,11 @@ document.getElementById('saveBtn').onclick = async () => {
     grade: document.getElementById('f-grade').value,
     date: dateVal,
     time: document.getElementById('f-time').value || null,
-    location: document.getElementById('f-location').value || null,
+    location: location || null,
+    notes: notes || null,
     school: pickedSchool
   };
 
-  saveBtn.disabled = true;
   const ok = await upsertEventRemote(evData);
   saveBtn.disabled = false;
   if (!ok) return;
