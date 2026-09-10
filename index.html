@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ตารางเรียน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F4F2EC;
+    --paper-line: #DCD8CC;
+    --ink: #22261F;
+    --ink-soft: #5C6055;
+    --card: #FFFFFF;
+    --accent-today: #E0A72E;
+    --school-a: #2C6E5C;
+    --school-a-soft: #DCEBE6;
+    --school-b: #B04A2F;
+    --school-b-soft: #F4DDD3;
+    --radius: 10px;
+    --shadow: 0 2px 0 rgba(34,38,31,0.08);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    background-image:
+      linear-gradient(var(--paper-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: var(--ink);
+    font-family: 'Sarabun', sans-serif;
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 20px 16px 60px;
+  }
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .title-block h1 {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    margin: 0;
+    letter-spacing: -0.5px;
+  }
+  .title-block p {
+    margin: 2px 0 0;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+
+  .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  .add-btn {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    padding: 11px 18px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: transform .12s ease, background .15s ease;
+  }
+  .add-btn:hover { background: #3A3F31; transform: translateY(-1px); }
+  .add-btn:active { transform: translateY(0); }
+
+  .admin-btn {
+    font-family: 'Sarabun', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1.5px solid var(--paper-line);
+    padding: 9px 14px;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .admin-btn:hover { border-color: var(--ink-soft); }
+  .admin-btn.is-admin {
+    color: var(--school-a);
+    border-color: var(--school-a);
+    background: var(--school-a-soft);
+  }
+
+  .month-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+  .month-bar button {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s ease, color .15s ease;
+  }
+  .month-bar button:hover { background: var(--ink); color: var(--paper); }
+  .month-bar .month-label {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    min-width: 170px;
+    text-align: center;
+  }
+  .today-btn {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    background: none;
+    border: 1px dashed var(--paper-line);
+    border-radius: 20px;
+    padding: 5px 12px;
+    cursor: pointer;
+  }
+  .today-btn:hover { border-color: var(--ink-soft); }
+
+  .legend {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .school-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--paper-line);
+    border-radius: 20px;
+    padding: 6px 14px 6px 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    box-shadow: var(--shadow);
+  }
+  .school-chip.editable { cursor: pointer; }
+  .school-chip .dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .main-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .cal-col { flex: 1 1 640px; min-width: 0; }
+  .side-col {
+    flex: 0 0 300px;
+    position: sticky;
+    top: 20px;
+  }
+
+  .cal {
+    background: var(--card);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 1px solid var(--paper-line);
+  }
+  .dow-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--ink);
+  }
+  .dow-row div {
+    color: var(--paper);
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    text-align: center;
+    padding: 8px 0;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+  }
+  .day {
+    min-height: 92px;
+    border-right: 1px solid var(--paper-line);
+    border-bottom: 1px solid var(--paper-line);
+    padding: 6px 6px 8px;
+    position: relative;
+    cursor: pointer;
+    transition: background .12s ease;
+  }
+  .day:nth-child(7n) { border-right: none; }
+  .day:hover { background: #FAF9F5; }
+  .day.other-month { background: #FBFAF7; color: #C8C4B6; }
+  .day.other-month:hover { background: #F7F6F1; }
+  .day.selected { background: #FBF3E1; }
+  .day-num {
+    font-family: 'Prompt', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+  }
+  .day.today .day-num {
+    background: var(--accent-today);
+    color: #fff;
+  }
+  .events { margin-top: 4px; display: flex; flex-direction: column; gap: 3px; }
+  .ev-chip {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+  .ev-more {
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    padding-left: 6px;
+  }
+
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--paper-line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 18px;
+  }
+  .panel-date {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    margin: 0 0 4px;
+  }
+  .panel-sub { color: var(--ink-soft); font-size: 12.5px; margin: 0 0 14px; }
+  .panel-empty { color: var(--ink-soft); font-size: 13.5px; text-align: center; padding: 20px 0; }
+  .panel-item {
+    border: 1px solid var(--paper-line);
+    border-left: 4px solid var(--school-a);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+  .panel-item .pi-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .panel-item .pi-subject {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+  }
+  .panel-item .pi-school {
+    font-size: 11px;
+    color: var(--ink-soft);
+  }
+  .panel-item .pi-meta {
+    margin-top: 6px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+  .panel-item .pi-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .pi-actions button {
+    font-family: 'Sarabun', sans-serif;
+    font-size: 12px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 2px 0;
+    font-weight: 600;
+  }
+  .pi-edit { color: var(--ink); }
+  .pi-delete { color: var(--school-b); }
+  .panel-add {
+    width: 100%;
+    margin-top: 4px;
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    background: var(--paper);
+    color: var(--ink);
+    border: 1.5px dashed var(--paper-line);
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+  }
+  .panel-add:hover { border-color: var(--ink-soft); }
+
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(34,38,31,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 16px;
+  }
+  .overlay.show { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 22px;
+    width: 100%;
+    max-width: 420px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  .modal h2 {
+    font-family: 'Prompt', sans-serif;
+    font-size: 19px;
+    margin: 0 0 16px;
+  }
+  .field { margin-bottom: 13px; }
+  .field label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 5px;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1.5px solid var(--paper-line);
+    border-radius: 8px;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 14px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--ink);
+  }
+  .select-with-add { display: flex; gap: 6px; }
+  .select-with-add select { flex: 1; }
+  .add-mini {
+    flex-shrink: 0;
+    width: 38px;
+    border: 1.5px solid var(--paper-line);
+    border-radius: 8px;
+    background: var(--paper);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .add-mini:hover { border-color: var(--ink); color: var(--ink); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .school-pick { display: flex; gap: 8px; }
+  .school-pick .opt {
+    flex: 1;
+    border: 2px solid var(--paper-line);
+    border-radius: 8px;
+    padding: 8px 6px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 18px;
+    gap: 10px;
+  }
+  .btn {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-save { background: var(--ink); color: var(--paper); flex: 1; }
+  .btn-save:hover { background: #3A3F31; }
+  .btn-save:disabled { opacity: .6; cursor: not-allowed; }
+  .btn-delete { background: transparent; color: var(--school-b); border: 1.5px solid var(--school-b); }
+  .btn-delete:hover { background: var(--school-b-soft); }
+
+  .close-x {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: none; border: none;
+    font-size: 20px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .color-swatches { display: flex; gap: 6px; }
+  .color-swatches span {
+    width: 22px; height: 22px; border-radius: 50%;
+    cursor: pointer; border: 2px solid transparent;
+  }
+  .color-swatches span.selected { border-color: var(--ink); }
+
+  .modal-note {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+
+  .empty-note {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  .empty-note.error { color: var(--school-b); font-weight: 600; }
+
+  @media (max-width: 860px) {
+    .main-layout { flex-direction: column; }
+    .side-col { flex: 1 1 auto; width: 100%; position: static; }
+  }
+
+  @media (max-width: 560px) {
+    .day { min-height: 74px; padding: 4px; }
+    .ev-chip { font-size: 9.5px; padding: 1px 4px; }
+    .month-bar .month-label { font-size: 17px; min-width: 130px; }
+    .dow-row div { font-size: 10.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="title-block">
+      <h1>ตารางเรียน</h1>
+      <p id="sub">ใครก็ดูได้ · เพิ่ม/แก้ไขได้เฉพาะแอดมิน</p>
+    </div>
+    <div class="header-actions">
+      <button class="add-btn" id="openAdd" style="display:none;">+ เพิ่มวิชา</button>
+      <button class="admin-btn" id="adminToggle">เข้าสู่ระบบแอดมิน</button>
+    </div>
+  </header>
+
+  <div class="month-bar">
+    <button id="prevMonth">‹</button>
+    <div class="month-label" id="monthLabel"></div>
+    <button id="nextMonth">›</button>
+  </div>
+  <div style="text-align:center; margin-bottom:14px;">
+    <button class="today-btn" id="gotoToday">ไปเดือนนี้</button>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="main-layout">
+    <div class="cal-col">
+      <div class="cal">
+        <div class="dow-row">
+          <div>อา</div><div>จ</div><div>อ</div><div>พ</div><div>พฤ</div><div>ศ</div><div>ส</div>
+        </div>
+        <div class="grid" id="grid"></div>
+      </div>
+      <div class="empty-note" id="loadingNote">กำลังโหลดข้อมูลจาก Supabase...</div>
+    </div>
+
+    <div class="side-col">
+      <div class="panel" id="panel">
+        <p class="panel-date">เลือกวันที่</p>
+        <p class="panel-sub">คลิกวันที่ในปฏิทินเพื่อดูรายละเอียดวิชาเรียน</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Event modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="close-x" id="closeModal">✕</button>
+    <h2 id="modalTitle">เพิ่มวิชาเรียน</h2>
+
+    <div class="field">
+      <label>โรงเรียน</label>
+      <div class="school-pick" id="schoolPick"></div>
+    </div>
+
+    <div class="field">
+      <label>วิชา</label>
+      <div class="select-with-add">
+        <select id="f-subject"></select>
+        <button type="button" class="add-mini" id="addSubjectBtn" title="เพิ่มวิชาใหม่">+</button>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>ชั้นปีที่</label>
+        <select id="f-grade">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>วันที่</label>
+        <input type="date" id="f-date">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>เวลา (24 ชม.)</label>
+      <input type="time" id="f-time">
+    </div>
+
+    <div class="field">
+      <label>สถานที่</label>
+      <div class="select-with-add">
+        <select id="f-location"></select>
+        <button type="button" class="add-mini" id="addLocationBtn" title="เพิ่มสถานที่ใหม่">+</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-delete" id="deleteBtn" style="display:none;">ลบ</button>
+      <button class="btn btn-save" id="saveBtn">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- School rename modal -->
+<div class="overlay" id="schoolOverlay">
+  <div class="modal" style="max-width:340px;">
+    <button class="close-x" id="closeSchoolModal">✕</button>
+    <h2>แก้ไขโรงเรียน</h2>
+    <div class="field">
+      <label>ชื่อโรงเรียน</label>
+      <input type="text" id="school-name">
+    </div>
+    <div class="field">
+      <label>สี</label>
+      <div class="color-swatches" id="school-colors"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-save" id="saveSchoolBtn" style="flex:1;">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin login modal -->
+<div class="overlay" id="adminOverlay">
+  <div class="modal" style="max-width:340px;">
+    <button class="close-x" id="closeAdminModal">✕</button>
+    <h2>เข้าสู่ระบบแอดมิน</h2>
+    <div class="field">
+      <label>รหัสผ่าน</label>
+      <input type="password" id="admin-password-input">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-save" id="adminLoginBtn" style="flex:1;">เข้าสู่ระบบ</button>
+    </div>
+    <p class="modal-note" id="adminNote"></p>
+  </div>
+</div>
+
+<!-- Supabase client library -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ============================================================
+// ⚙️ ตั้งค่า Supabase ตรงนี้ก่อนใช้งาน
+// หาได้จาก Supabase Dashboard > Project Settings > API
+// ============================================================
+const SUPABASE_URL = 'https://whreugmyjcnrpvamblqy.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndocmV1Z215amNucnB2YW1ibHF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NzM3ODgsImV4cCI6MjEwNDU0OTc4OH0.s7-vsD0KgaMlEHAHbbhvmYHO0OKlUV-1llP5GZRLnsU';
+// ============================================================
+
+const sb = (SUPABASE_URL.includes('YOUR-PROJECT') || !window.supabase)
+  ? null
+  : window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const COLOR_PALETTE = ['#2C6E5C','#B04A2F','#2E5C8A','#8A5A2E','#6B4C8A','#3A7A3A','#A3462C','#4C6B8A'];
+
+let data = {
+  schools: [],
+  subjects: [],
+  locations: [],
+  events: []
+};
+
+let isAdmin = false;
+let current = new Date();
+current.setDate(1);
+let editingId = null;
+let pickedSchool = null;
+let editingSchoolId = null;
+let pickedColor = COLOR_PALETTE[0];
+let selectedDate = null;
+
+const monthNames = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+
+// ---- Load all data from Supabase ----
+async function loadData() {
+  if (!sb) {
+    showLoadError('ยังไม่ได้ตั้งค่า SUPABASE_URL / SUPABASE_ANON_KEY ในไฟล์นี้ กรุณาแก้ไขก่อนใช้งาน');
+    return;
+  }
+  try {
+    const [schoolsRes, subjectsRes, locationsRes, eventsRes] = await Promise.all([
+      sb.from('schools').select('*').order('name'),
+      sb.from('subjects').select('name').order('name'),
+      sb.from('locations').select('name').order('name'),
+      sb.from('events').select('*')
+    ]);
+    if (schoolsRes.error) throw schoolsRes.error;
+    if (subjectsRes.error) throw subjectsRes.error;
+    if (locationsRes.error) throw locationsRes.error;
+    if (eventsRes.error) throw eventsRes.error;
+
+    data.schools = schoolsRes.data || [];
+    data.subjects = (subjectsRes.data || []).map(r => r.name);
+    data.locations = (locationsRes.data || []).map(r => r.name);
+    data.events = eventsRes.data || [];
+
+    if (data.schools.length) pickedSchool = data.schools[0].id;
+  } catch (e) {
+    console.error(e);
+    showLoadError('เชื่อมต่อ Supabase ไม่สำเร็จ: ' + (e.message || 'โปรดตรวจสอบตารางและ RLS policy'));
+    return;
+  }
+
+  document.getElementById('loadingNote').style.display = 'none';
+  renderLegend();
+  renderCalendar();
+  updateAdminUI();
+}
+
+function showLoadError(msg) {
+  const note = document.getElementById('loadingNote');
+  note.textContent = msg;
+  note.classList.add('error');
+}
+
+function schoolById(id) {
+  return data.schools.find(s => s.id === id) || data.schools[0];
+}
+
+// ---- Remote write helpers ----
+async function upsertEventRemote(evData) {
+  const { error } = await sb.from('events').upsert(evData, { onConflict: 'id' });
+  if (error) { console.error(error); alert('บันทึกวิชาไม่สำเร็จ: ' + error.message); return false; }
+  return true;
+}
+
+async function deleteEventRemote(id) {
+  const { error } = await sb.from('events').delete().eq('id', id);
+  if (error) { console.error(error); alert('ลบวิชาไม่สำเร็จ: ' + error.message); return false; }
+  return true;
+}
+
+async function addSubjectRemote(name) {
+  const { error } = await sb.from('subjects').upsert({ name }, { onConflict: 'name', ignoreDuplicates: true });
+  if (error) { console.error(error); alert('เพิ่มวิชาไม่สำเร็จ: ' + error.message); return false; }
+  return true;
+}
+
+async function addLocationRemote(name) {
+  const { error } = await sb.from('locations').upsert({ name }, { onConflict: 'name', ignoreDuplicates: true });
+  if (error) { console.error(error); alert('เพิ่มสถานที่ไม่สำเร็จ: ' + error.message); return false; }
+  return true;
+}
+
+async function updateSchoolRemote(school) {
+  const { error } = await sb.from('schools').update({ name: school.name, color: school.color }).eq('id', school.id);
+  if (error) { console.error(error); alert('บันทึกโรงเรียนไม่สำเร็จ: ' + error.message); return false; }
+  return true;
+}
+
+function renderLegend() {
+  const legend = document.getElementById('legend');
+  legend.innerHTML = '';
+  data.schools.forEach(s => {
+    const chip = document.createElement('div');
+    chip.className = 'school-chip' + (isAdmin ? ' editable' : '');
+    chip.innerHTML = `<span class="dot" style="background:${s.color}"></span>${s.name}`;
+    if (isAdmin) chip.onclick = () => openSchoolModal(s.id);
+    legend.appendChild(chip);
+  });
+}
+
+function pad(n) { return n.toString().padStart(2, '0'); }
+function dateKey(y, m, d) { return `${y}-${pad(m + 1)}-${pad(d)}`; }
+
+function formatDateLong(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  return `${d} ${monthNames[m - 1]} ${y}`;
+}
+
+function renderCalendar() {
+  const y = current.getFullYear();
+  const m = current.getMonth();
+  document.getElementById('monthLabel').textContent = `${monthNames[m]} ${y}`;
+
+  const firstDay = new Date(y, m, 1);
+  const startOffset = firstDay.getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const daysInPrevMonth = new Date(y, m, 0).getDate();
+
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+
+  const todayStr = dateKey(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+  const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+
+  for (let i = 0; i < totalCells; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'day';
+
+    let dayNum, cellY = y, cellM = m, otherMonth = false;
+    if (i < startOffset) {
+      dayNum = daysInPrevMonth - startOffset + i + 1;
+      cellM = m - 1; cellY = y;
+      if (cellM < 0) { cellM = 11; cellY = y - 1; }
+      otherMonth = true;
+    } else if (i >= startOffset + daysInMonth) {
+      dayNum = i - startOffset - daysInMonth + 1;
+      cellM = m + 1; cellY = y;
+      if (cellM > 11) { cellM = 0; cellY = y + 1; }
+      otherMonth = true;
+    } else {
+      dayNum = i - startOffset + 1;
+    }
+
+    const key = dateKey(cellY, cellM, dayNum);
+    if (otherMonth) cell.classList.add('other-month');
+    if (key === todayStr) cell.classList.add('today');
+    if (key === selectedDate) cell.classList.add('selected');
+
+    const numEl = document.createElement('div');
+    numEl.className = 'day-num';
+    numEl.textContent = dayNum;
+    cell.appendChild(numEl);
+
+    const dayEvents = data.events
+      .filter(e => e.date === key)
+      .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+
+    const evWrap = document.createElement('div');
+    evWrap.className = 'events';
+    const maxShow = 3;
+    dayEvents.slice(0, maxShow).forEach(ev => {
+      const sc = schoolById(ev.school);
+      const chip = document.createElement('div');
+      chip.className = 'ev-chip';
+      chip.style.background = sc.color + '22';
+      chip.style.color = sc.color;
+      chip.textContent = (ev.time ? ev.time.slice(0,5) + ' ' : '') + ev.subject;
+      evWrap.appendChild(chip);
+    });
+    if (dayEvents.length > maxShow) {
+      const more = document.createElement('div');
+      more.className = 'ev-more';
+      more.textContent = `+${dayEvents.length - maxShow} เพิ่มเติม`;
+      evWrap.appendChild(more);
+    }
+    cell.appendChild(evWrap);
+
+    cell.onclick = () => selectDate(key);
+    grid.appendChild(cell);
+  }
+}
+
+// ---- Side panel ----
+function selectDate(key) {
+  selectedDate = key;
+  renderCalendar();
+  renderPanel();
+}
+
+function renderPanel() {
+  const panel = document.getElementById('panel');
+  if (!selectedDate) {
+    panel.innerHTML = `<p class="panel-date">เลือกวันที่</p><p class="panel-sub">คลิกวันที่ในปฏิทินเพื่อดูรายละเอียดวิชาเรียน</p>`;
+    return;
+  }
+  const dayEvents = data.events
+    .filter(e => e.date === selectedDate)
+    .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+
+  let html = `<p class="panel-date">${formatDateLong(selectedDate)}</p>`;
+
+  if (dayEvents.length === 0) {
+    html += `<p class="panel-empty">ยังไม่มีวิชาในวันนี้</p>`;
+  } else {
+    html += '<div>';
+    dayEvents.forEach(ev => {
+      const sc = schoolById(ev.school);
+      html += `
+        <div class="panel-item" style="border-left-color:${sc.color}">
+          <div class="pi-top">
+            <div>
+              <div class="pi-subject">${escapeHtml(ev.subject)}</div>
+              <div class="pi-school">${escapeHtml(sc.name)}${ev.grade ? ' · ชั้นปีที่ ' + escapeHtml(ev.grade) : ''}</div>
+            </div>
+          </div>
+          <div class="pi-meta">
+            ${ev.time ? '🕐 ' + escapeHtml(ev.time.slice(0,5)) + ' น.<br>' : ''}
+            ${ev.location ? '📍 ' + escapeHtml(ev.location) : ''}
+          </div>
+          ${isAdmin ? `
+          <div class="pi-actions">
+            <button class="pi-edit" data-id="${ev.id}">แก้ไข</button>
+            <button class="pi-delete" data-id="${ev.id}">ลบ</button>
+          </div>` : ''}
+        </div>`;
+    });
+    html += '</div>';
+  }
+
+  if (isAdmin) {
+    html += `<button class="panel-add" id="panelAddBtn">+ เพิ่มวิชาในวันนี้</button>`;
+  }
+
+  panel.innerHTML = html;
+
+  panel.querySelectorAll('.pi-edit').forEach(btn => {
+    btn.onclick = () => openEdit(btn.dataset.id);
+  });
+  panel.querySelectorAll('.pi-delete').forEach(btn => {
+    btn.onclick = () => deleteEvent(btn.dataset.id);
+  });
+  const addBtn = document.getElementById('panelAddBtn');
+  if (addBtn) addBtn.onclick = () => openAdd(selectedDate);
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : str;
+  return div.innerHTML;
+}
+
+// ---- Select helpers (subjects / locations) ----
+function populateSelect(selectEl, arr, selectedValue) {
+  selectEl.innerHTML = '';
+  if (arr.length === 0) {
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = 'ยังไม่มีรายการ — กด + เพื่อเพิ่ม';
+    selectEl.appendChild(opt);
+    return;
+  }
+  arr.forEach(item => {
+    const opt = document.createElement('option');
+    opt.value = item;
+    opt.textContent = item;
+    selectEl.appendChild(opt);
+  });
+  if (selectedValue && arr.includes(selectedValue)) {
+    selectEl.value = selectedValue;
+  }
+}
+
+document.getElementById('addSubjectBtn').onclick = async () => {
+  const name = prompt('ชื่อวิชาใหม่:');
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  if (!data.subjects.includes(trimmed)) {
+    const ok = await addSubjectRemote(trimmed);
+    if (!ok) return;
+    data.subjects.push(trimmed);
+    data.subjects.sort((a, b) => a.localeCompare(b, 'th'));
+  }
+  populateSelect(document.getElementById('f-subject'), data.subjects, trimmed);
+};
+
+document.getElementById('addLocationBtn').onclick = async () => {
+  const name = prompt('สถานที่ใหม่:');
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  if (!data.locations.includes(trimmed)) {
+    const ok = await addLocationRemote(trimmed);
+    if (!ok) return;
+    data.locations.push(trimmed);
+    data.locations.sort((a, b) => a.localeCompare(b, 'th'));
+  }
+  populateSelect(document.getElementById('f-location'), data.locations, trimmed);
+};
+
+// ---- Event modal ----
+function renderSchoolPick() {
+  const wrap = document.getElementById('schoolPick');
+  wrap.innerHTML = '';
+  data.schools.forEach(s => {
+    const opt = document.createElement('div');
+    opt.className = 'opt';
+    opt.textContent = s.name;
+    opt.style.borderColor = pickedSchool === s.id ? s.color : '#DCD8CC';
+    opt.style.background = pickedSchool === s.id ? s.color + '22' : 'transparent';
+    opt.onclick = () => { pickedSchool = s.id; renderSchoolPick(); };
+    wrap.appendChild(opt);
+  });
+}
+
+function openAdd(dateStr) {
+  if (!isAdmin || !data.schools.length) return;
+  editingId = null;
+  document.getElementById('modalTitle').textContent = 'เพิ่มวิชาเรียน';
+  document.getElementById('deleteBtn').style.display = 'none';
+  populateSelect(document.getElementById('f-subject'), data.subjects, null);
+  populateSelect(document.getElementById('f-location'), data.locations, null);
+  document.getElementById('f-grade').value = '1';
+  document.getElementById('f-date').value = dateStr || selectedDate || dateKey(current.getFullYear(), current.getMonth(), 1);
+  document.getElementById('f-time').value = '';
+  pickedSchool = data.schools[0].id;
+  renderSchoolPick();
+  document.getElementById('overlay').classList.add('show');
+}
+
+function openEdit(id) {
+  if (!isAdmin) return;
+  const ev = data.events.find(e => e.id === id);
+  if (!ev) return;
+  editingId = id;
+  document.getElementById('modalTitle').textContent = 'แก้ไขวิชาเรียน';
+  document.getElementById('deleteBtn').style.display = 'inline-block';
+  populateSelect(document.getElementById('f-subject'), data.subjects, ev.subject);
+  populateSelect(document.getElementById('f-location'), data.locations, ev.location);
+  document.getElementById('f-grade').value = ev.grade || '1';
+  document.getElementById('f-date').value = ev.date || '';
+  document.getElementById('f-time').value = ev.time ? ev.time.slice(0,5) : '';
+  pickedSchool = ev.school || data.schools[0].id;
+  renderSchoolPick();
+  document.getElementById('overlay').classList.add('show');
+}
+
+async function deleteEvent(id) {
+  if (!isAdmin) return;
+  if (!confirm('ลบวิชานี้ออกจากตารางเรียน?')) return;
+  const ok = await deleteEventRemote(id);
+  if (!ok) return;
+  data.events = data.events.filter(e => e.id !== id);
+  renderCalendar();
+  renderPanel();
+}
+
+document.getElementById('openAdd').onclick = () => openAdd();
+document.getElementById('closeModal').onclick = () => document.getElementById('overlay').classList.remove('show');
+document.getElementById('overlay').onclick = (e) => { if (e.target.id === 'overlay') e.currentTarget.classList.remove('show'); };
+
+document.getElementById('saveBtn').onclick = async () => {
+  if (!isAdmin) return;
+  const saveBtn = document.getElementById('saveBtn');
+  const subject = document.getElementById('f-subject').value;
+  const dateVal = document.getElementById('f-date').value;
+  if (!subject) { alert('กรุณาเลือกหรือเพิ่มชื่อวิชา'); return; }
+  if (!dateVal) { alert('กรุณาเลือกวันที่'); return; }
+
+  const evData = {
+    id: editingId || ('ev_' + Date.now()),
+    subject,
+    grade: document.getElementById('f-grade').value,
+    date: dateVal,
+    time: document.getElementById('f-time').value || null,
+    location: document.getElementById('f-location').value || null,
+    school: pickedSchool
+  };
+
+  saveBtn.disabled = true;
+  const ok = await upsertEventRemote(evData);
+  saveBtn.disabled = false;
+  if (!ok) return;
+
+  const idx = data.events.findIndex(e => e.id === evData.id);
+  if (idx >= 0) data.events[idx] = evData; else data.events.push(evData);
+
+  document.getElementById('overlay').classList.remove('show');
+  renderCalendar();
+  renderPanel();
+};
+
+document.getElementById('deleteBtn').onclick = async () => {
+  if (!editingId) return;
+  await deleteEvent(editingId);
+  document.getElementById('overlay').classList.remove('show');
+};
+
+// ---- School rename modal ----
+function openSchoolModal(id) {
+  if (!isAdmin) return;
+  editingSchoolId = id;
+  const s = schoolById(id);
+  document.getElementById('school-name').value = s.name;
+  pickedColor = s.color;
+  const wrap = document.getElementById('school-colors');
+  wrap.innerHTML = '';
+  COLOR_PALETTE.forEach(c => {
+    const sw = document.createElement('span');
+    sw.style.background = c;
+    if (c === pickedColor) sw.classList.add('selected');
+    sw.onclick = () => {
+      pickedColor = c;
+      wrap.querySelectorAll('span').forEach(x => x.classList.remove('selected'));
+      sw.classList.add('selected');
+    };
+    wrap.appendChild(sw);
+  });
+  document.getElementById('schoolOverlay').classList.add('show');
+}
+
+document.getElementById('closeSchoolModal').onclick = () => document.getElementById('schoolOverlay').classList.remove('show');
+document.getElementById('schoolOverlay').onclick = (e) => { if (e.target.id === 'schoolOverlay') e.currentTarget.classList.remove('show'); };
+
+document.getElementById('saveSchoolBtn').onclick = async () => {
+  if (!isAdmin) return;
+  const name = document.getElementById('school-name').value.trim();
+  if (!name) { alert('กรุณากรอกชื่อโรงเรียน'); return; }
+  const s = schoolById(editingSchoolId);
+  const ok = await updateSchoolRemote({ id: s.id, name, color: pickedColor });
+  if (!ok) return;
+  s.name = name;
+  s.color = pickedColor;
+  document.getElementById('schoolOverlay').classList.remove('show');
+  renderLegend();
+  renderCalendar();
+  renderPanel();
+};
+
+// ---- Admin login (verified via Supabase RPC, password never sent to client) ----
+function updateAdminUI() {
+  document.getElementById('openAdd').style.display = isAdmin ? 'inline-block' : 'none';
+  const btn = document.getElementById('adminToggle');
+  btn.textContent = isAdmin ? 'ออกจากระบบแอดมิน' : 'เข้าสู่ระบบแอดมิน';
+  btn.classList.toggle('is-admin', isAdmin);
+  renderLegend();
+  renderPanel();
+}
+
+document.getElementById('adminToggle').onclick = () => {
+  if (isAdmin) {
+    isAdmin = false;
+    updateAdminUI();
+  } else {
+    document.getElementById('admin-password-input').value = '';
+    document.getElementById('adminNote').textContent = '';
+    document.getElementById('adminOverlay').classList.add('show');
+  }
+};
+
+document.getElementById('closeAdminModal').onclick = () => document.getElementById('adminOverlay').classList.remove('show');
+document.getElementById('adminOverlay').onclick = (e) => { if (e.target.id === 'adminOverlay') e.currentTarget.classList.remove('show'); };
+
+document.getElementById('adminLoginBtn').onclick = async () => {
+  if (!sb) return;
+  const val = document.getElementById('admin-password-input').value;
+  const note = document.getElementById('adminNote');
+  const loginBtn = document.getElementById('adminLoginBtn');
+  loginBtn.disabled = true;
+  const { data: ok, error } = await sb.rpc('verify_admin_password', { input_password: val });
+  loginBtn.disabled = false;
+  if (error) {
+    console.error(error);
+    note.textContent = 'เกิดข้อผิดพลาดในการตรวจสอบ ลองใหม่อีกครั้ง';
+    return;
+  }
+  if (ok) {
+    isAdmin = true;
+    document.getElementById('adminOverlay').classList.remove('show');
+    updateAdminUI();
+  } else {
+    note.textContent = 'รหัสผ่านไม่ถูกต้อง ลองใหม่อีกครั้ง';
+  }
+};
+document.getElementById('admin-password-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('adminLoginBtn').click();
+});
+
+// ---- Month nav ----
+document.getElementById('prevMonth').onclick = () => { current.setMonth(current.getMonth() - 1); renderCalendar(); };
+document.getElementById('nextMonth').onclick = () => { current.setMonth(current.getMonth() + 1); renderCalendar(); };
+document.getElementById('gotoToday').onclick = () => { current = new Date(); current.setDate(1); renderCalendar(); };
+
+loadData();
+</script>
+</body>
+</html>
