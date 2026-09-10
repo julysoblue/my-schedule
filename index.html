@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --paper: #F4F2EC;
+    --paper: #e4dfd3;
     --paper-line: #DCD8CC;
     --ink: #22261F;
     --ink-soft: #5C6055;
@@ -28,8 +28,8 @@
     margin: 0;
     background: var(--paper);
     background-image:
-      linear-gradient(var(--paper-line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
+      linear-gradient(var(--paper-line) 0px, transparent 0px),
+      linear-gradient(90deg, var(--paper-line) 0px, transparent 0px);
     background-size: 28px 28px;
     color: var(--ink);
     font-family: 'Sarabun', sans-serif;
@@ -125,7 +125,7 @@
     min-width: 170px;
     text-align: center;
   }
-  .-btn {
+  .today-btn {
     font-family: 'Sarabun', sans-serif;
     font-size: 13px;
     color: var(--ink-soft);
@@ -135,7 +135,7 @@
     padding: 5px 12px;
     cursor: pointer;
   }
-  .-btn:hover { border-color: var(--ink-soft); }
+  .today-btn:hover { border-color: var(--ink-soft); }
 
   .legend {
     display: flex;
@@ -222,8 +222,8 @@
     width: 22px; height: 22px;
     border-radius: 50%;
   }
-  .day. .day-num {
-    background: var(--accent-);
+  .day.today .day-num {
+    background: var(--accent-today);
     color: #fff;
   }
   .events { margin-top: 4px; display: flex; flex-direction: column; gap: 3px; }
@@ -464,7 +464,7 @@
   <header>
     <div class="title-block">
       <h1>ตารางเรียน</h1>
-      <p id="sub">Hogworlds+Aethera</p>
+      <p id="sub">HW & ATR</p>
     </div>
     <div class="header-actions">
       <button class="add-btn" id="openAdd" style="display:none;">+ เพิ่มวิชา</button>
