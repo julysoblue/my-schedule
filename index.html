@@ -199,7 +199,8 @@
     grid-template-columns: repeat(7, 1fr);
   }
   .day {
-    min-height: 92px;
+    height: 92px; 
+    overflow: hidden;
     border-right: 1px solid var(--paper-line);
     border-bottom: 1px solid var(--paper-line);
     padding: 6px 6px 8px;
@@ -451,7 +452,7 @@
   }
 
   @media (max-width: 560px) {
-    .day { min-height: 74px; padding: 4px; }
+    .day { min-height: 86px; padding: 4px; }
     .ev-chip { font-size: 9.5px; padding: 1px 4px; }
     .month-bar .month-label { font-size: 17px; min-width: 130px; }
     .dow-row div { font-size: 10.5px; }
